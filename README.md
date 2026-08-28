@@ -4,6 +4,13 @@ A unified view of customer behaviour across savings and credit card products.
 Built on SQL Server with dbt, using a simple layered approach:
 raw -> staging -> intermediate -> gold.
 
+## Documentation
+
+- [docs/data_model.md](docs/data_model.md) - model design, layers, lineage diagram
+- [docs/business_logic.md](docs/business_logic.md) - metric definitions and the reasoning behind them
+- [docs/data_quality.md](docs/data_quality.md) - issues found, test coverage, recommendations
+- [customer_360_dbt/README.md](customer_360_dbt/README.md) - dbt project notes
+
 ## Folder structure
 
 ```
