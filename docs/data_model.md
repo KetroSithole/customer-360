@@ -97,11 +97,10 @@ appear, with zeroed metrics.
 
 ## Reporting optimization
 
-- The gold table is a physical table with a clustered columnstore index
-  (the dbt-sqlserver default), which suits the scan-and-aggregate queries
-  Power BI and Tableau generate.
-- A unique nonclustered index on customer_id (added by a post-hook) supports
-  single-customer lookups and joins.
+- The gold table is a Delta table with liquid clustering on customer_id,
+  which suits both single-customer lookups and the scan-and-aggregate
+  queries Power BI and Tableau generate.
 - All segments and flags are precomputed. BI tools filter on plain columns
   and never re-derive business logic, so every report shows the same numbers.
 - 100k rows by about 45 columns fits easily in import mode for both tools.
+  Connect via a Databricks SQL Warehouse with the built-in connector.

@@ -31,17 +31,25 @@ Case_study_data/
 
 ## How to run
 
-```bash
-# 1. Load the raw CSVs into SQL Server (safe to re-run)
-python scripts/load_to_sqlserver.py
+This branch targets Databricks. The main branch targets SQL Server.
 
-# 2. Build all models and run all tests
+```bash
+# 1. Upload the CSVs and create the bronze tables
+#    (run scripts/databricks_ingest.sql in the Databricks SQL editor)
+
+# 2. Set connection details
+export DATABRICKS_HOST=adb-xxxx.azuredatabricks.net
+export DATABRICKS_HTTP_PATH=/sql/1.0/warehouses/xxxx
+export DATABRICKS_TOKEN=xxxx
+
+# 3. Build all models and run all tests
+pip install dbt-databricks
 cd customer_360_dbt
 dbt build --profiles-dir .
 ```
 
-Environment: server `GHOST\MSSQLSERVER02`, database `CaseStudyDB`,
-Windows authentication, ODBC Driver 17.
+Environment: Unity Catalog `casestudy`, schemas `raw`, `staging`,
+`intermediate` and `marts`.
 
 ## Deliverables
 

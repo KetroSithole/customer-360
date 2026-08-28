@@ -26,9 +26,9 @@ per_customer as (
         avg(abs(t.transaction_amount))                               as avg_transaction_value,
         min(t.transaction_date)                                      as first_transaction_date,
         max(t.transaction_date)                                      as last_transaction_date,
-        sum(case when t.transaction_date >= dateadd(day, -90, r.as_of_date)
+        sum(case when t.transaction_date >= date_add(r.as_of_date, -90)
                  then 1 else 0 end)                                  as transactions_last_90d,
-        sum(case when t.transaction_date >= dateadd(day, -90, r.as_of_date)
+        sum(case when t.transaction_date >= date_add(r.as_of_date, -90)
                  then abs(t.transaction_amount) else 0 end)          as transaction_value_last_90d
     from transactions t
     cross join reference_date r

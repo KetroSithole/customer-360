@@ -13,9 +13,7 @@
 {{
     config(
         materialized='table',
-        post_hook=[
-            "create unique nonclustered index ix_customer_360_customer_id on {{ this }} (customer_id)"
-        ]
+        liquid_clustered_by='customer_id'
     )
 }}
 
@@ -50,11 +48,9 @@ joined as (
         c.mobile,
         c.gender,
         c.date_of_birth,
-        datediff(year, c.date_of_birth, r.as_of_date)
-            - case when dateadd(year, datediff(year, c.date_of_birth, r.as_of_date), c.date_of_birth) > r.as_of_date
-                   then 1 else 0 end                                    as age,
+        cast(floor(months_between(r.as_of_date, c.date_of_birth) / 12) as int) as age,
         c.signup_date,
-        datediff(month, c.signup_date, r.as_of_date)                    as tenure_months,
+        cast(floor(months_between(r.as_of_date, c.signup_date)) as int)        as tenure_months,
         r.as_of_date,
 
         -- product holdings
@@ -88,14 +84,7 @@ joined as (
         coalesce(i.interactions_last_90d, 0)                            as interactions_last_90d,
 
         -- recency
-        case
-            when t.last_transaction_date is null and i.last_interaction_date is null then null
-            when t.last_transaction_date is null then cast(i.last_interaction_date as date)
-            when i.last_interaction_date is null then cast(t.last_transaction_date as date)
-            when cast(t.last_transaction_date as date) >= i.last_interaction_date
-                then cast(t.last_transaction_date as date)
-            else i.last_interaction_date
-        end                                                             as last_activity_date,
+        greatest(cast(t.last_transaction_date as date), i.last_interaction_date) as last_activity_date,
 
         -- data quality
         c.is_duplicate_email
@@ -112,18 +101,18 @@ final as (
 
     select
         j.*,
-        datediff(day, j.last_activity_date, j.as_of_date)               as days_since_last_activity,
+        datediff(j.as_of_date, j.last_activity_date)                    as days_since_last_activity,
 
         -- Active = any transaction or interaction within 90 days of as_of_date
-        case when datediff(day, j.last_activity_date, j.as_of_date) <= 90
+        case when datediff(j.as_of_date, j.last_activity_date) <= 90
              then 1 else 0 end                                          as is_active,
 
         -- Lifecycle stage
         case
             when j.last_activity_date is null                                    then 'Never Active'
-            when datediff(month, j.signup_date, j.as_of_date) <= 6               then 'New'
-            when datediff(day, j.last_activity_date, j.as_of_date) <= 90         then 'Active'
-            when datediff(day, j.last_activity_date, j.as_of_date) <= 180        then 'At Risk'
+            when months_between(j.as_of_date, j.signup_date) <= 6                then 'New'
+            when datediff(j.as_of_date, j.last_activity_date) <= 90              then 'Active'
+            when datediff(j.as_of_date, j.last_activity_date) <= 180             then 'At Risk'
             else 'Dormant'
         end                                                             as lifecycle_stage,
 
@@ -157,10 +146,10 @@ final as (
 
         -- Age band for demographic reporting
         case
-            when datediff(year, j.date_of_birth, j.as_of_date) < 25 then '18-24'
-            when datediff(year, j.date_of_birth, j.as_of_date) < 35 then '25-34'
-            when datediff(year, j.date_of_birth, j.as_of_date) < 45 then '35-44'
-            when datediff(year, j.date_of_birth, j.as_of_date) < 55 then '45-54'
+            when floor(months_between(j.as_of_date, j.date_of_birth) / 12) < 25 then '18-24'
+            when floor(months_between(j.as_of_date, j.date_of_birth) / 12) < 35 then '25-34'
+            when floor(months_between(j.as_of_date, j.date_of_birth) / 12) < 45 then '35-44'
+            when floor(months_between(j.as_of_date, j.date_of_birth) / 12) < 55 then '45-54'
             else '55+'
         end                                                             as age_band
 

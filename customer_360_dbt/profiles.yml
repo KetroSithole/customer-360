@@ -1,13 +1,15 @@
+# Databricks connection. Set these environment variables before running dbt:
+#   DATABRICKS_HOST        e.g. adb-1234567890.12.azuredatabricks.net
+#   DATABRICKS_HTTP_PATH   e.g. /sql/1.0/warehouses/abc123
+#   DATABRICKS_TOKEN       a personal access token
 customer_360:
   target: dev
   outputs:
     dev:
-      type: sqlserver
-      driver: "ODBC Driver 17 for SQL Server"
-      server: GHOST\MSSQLSERVER02
-      database: CaseStudyDB
+      type: databricks
+      catalog: casestudy
       schema: analytics
-      windows_login: true
-      encrypt: false
-      trust_cert: true
+      host: "{{ env_var('DATABRICKS_HOST') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN') }}"
       threads: 4

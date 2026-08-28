@@ -14,11 +14,11 @@ cleaned as (
 
     select
         customer_id,
-        ltrim(rtrim(first_name))                            as first_name,
-        ltrim(rtrim(last_name))                             as last_name,
-        lower(ltrim(rtrim(email)))                          as email,
+        trim(first_name)                                    as first_name,
+        trim(last_name)                                     as last_name,
+        lower(trim(email))                                  as email,
         case
-            when mobile like '0%'  then '+63' + substring(mobile, 2, 20)
+            when mobile like '0%'  then concat('+63', substring(mobile, 2, 20))
             when mobile like '+63%' then mobile
             else mobile
         end                                                 as mobile,

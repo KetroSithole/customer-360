@@ -3,8 +3,8 @@ version: 2
 sources:
   - name: raw
     description: Raw source tables loaded from bank source systems (CSV extracts).
-    database: CaseStudyDB
-    schema: dbo
+    database: casestudy
+    schema: raw
     tables:
       - name: customer_raw
         description: Customer master data from the core banking system.

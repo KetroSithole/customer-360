@@ -6,5 +6,5 @@ select
     customer_id,
     product_type,
     enrollment_date,
-    [limit] as credit_limit
+    `limit` as credit_limit
 from {{ source('raw', 'product_enrollments') }}
