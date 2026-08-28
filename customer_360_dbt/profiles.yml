@@ -1,0 +1,13 @@
+customer_360:
+  target: dev
+  outputs:
+    dev:
+      type: sqlserver
+      driver: "ODBC Driver 17 for SQL Server"
+      server: GHOST\MSSQLSERVER02
+      database: CaseStudyDB
+      schema: analytics
+      windows_login: true
+      encrypt: false
+      trust_cert: true
+      threads: 4

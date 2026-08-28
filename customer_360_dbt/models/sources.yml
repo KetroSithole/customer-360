@@ -1,0 +1,54 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw source tables loaded from bank source systems (CSV extracts).
+    database: CaseStudyDB
+    schema: dbo
+    tables:
+      - name: customer_raw
+        description: Customer master data from the core banking system.
+        columns:
+          - name: customer_id
+            description: Unique customer identifier.
+            tests: [unique, not_null]
+      - name: product_enrollments
+        description: Product holdings (savings accounts, credit cards) per customer.
+        columns:
+          - name: product_id
+            description: Unique product account identifier.
+            tests: [unique, not_null]
+          - name: customer_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('raw', 'customer_raw')
+                  field: customer_id
+      - name: crm_interactions
+        description: Customer service interactions (call, chat, email) from the CRM.
+        columns:
+          - name: interaction_id
+            tests: [unique, not_null]
+          - name: customer_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('raw', 'customer_raw')
+                  field: customer_id
+      - name: transaction_history
+        description: Financial transactions across all product accounts.
+        columns:
+          - name: transaction_id
+            tests: [unique, not_null]
+          - name: customer_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('raw', 'customer_raw')
+                  field: customer_id
+          - name: product_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('raw', 'product_enrollments')
+                  field: product_id

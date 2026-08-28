@@ -1,0 +1,19 @@
+# data files stay local
+data/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# dbt artifacts
+customer_360_dbt/target/
+customer_360_dbt/logs/
+customer_360_dbt/dbt_packages/
+customer_360_dbt/build_log.txt
+
+# os junk
+__MACOSX/
+.DS_Store
+Thumbs.db
+customer_360_dbt/.user.yml

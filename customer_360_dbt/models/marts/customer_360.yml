@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: customer_360
+    description: >
+      Gold-layer unified customer view: one row per customer combining
+      profile, product holdings, transaction behaviour, CRM engagement,
+      recency, and derived business segments. Optimized for BI consumption
+      (Power BI / Tableau) - pre-aggregated, indexed on customer_id.
+    columns:
+      - name: customer_id
+        description: Unique customer identifier (grain of the table).
+        tests: [unique, not_null]
+      - name: age
+        description: Age in whole years at as_of_date.
+      - name: tenure_months
+        description: Months since signup at as_of_date.
+      - name: as_of_date
+        description: Anchor date all recency metrics are measured against.
+        tests: [not_null]
+      - name: product_count
+        description: Total product holdings.
+      - name: total_credit_limit
+        description: Sum of credit limits across credit cards.
+      - name: total_transaction_value
+        description: Lifetime sum of absolute transaction amounts.
+      - name: current_total_balance
+        description: Sum of the latest closing balance of each product account.
+      - name: last_activity_date
+        description: Most recent transaction or CRM interaction date.
+      - name: is_active
+        description: 1 when last activity is within 90 days of as_of_date.
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: lifecycle_stage
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["New", "Active", "At Risk", "Dormant", "Never Active"]
+      - name: value_segment
+        description: Quartile of lifetime transaction value.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Platinum", "Gold", "Silver", "Bronze"]
+      - name: engagement_level
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Highly Engaged", "Engaged", "Previously Engaged", "Never Engaged"]
+      - name: preferred_channel
+        tests:
+          - accepted_values:
+              values: ["Chat", "Email", "Call", "None"]
+      - name: is_cross_sell_candidate
+        description: Savings-only customers who are credit card prospects.
+      - name: is_duplicate_email
+        description: Data quality flag - email shared with another customer.

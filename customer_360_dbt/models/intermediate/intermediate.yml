@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: int_reference_date
+    description: >
+      Single-row anchor date = most recent activity (transaction or interaction)
+      in the data. All recency logic is measured against this date so results
+      are stable for a static extract.
+
+  - name: int_customer_products
+    description: Product holdings aggregated to one row per customer.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+
+  - name: int_customer_transactions
+    description: >
+      Transaction behaviour per customer, including lifetime and 90-day
+      metrics and the current total balance (latest closing balance per
+      product account, summed).
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+
+  - name: int_customer_interactions
+    description: CRM interaction behaviour aggregated to one row per customer.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]

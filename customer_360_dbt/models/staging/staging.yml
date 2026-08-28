@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: >
+      Cleansed customer master. Emails are lower-cased/trimmed, mobile numbers
+      standardized to +63 international format, and duplicate emails flagged.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: email
+        tests: [not_null]
+      - name: mobile
+        description: Standardized to +63XXXXXXXXXX (13 chars).
+        tests: [not_null]
+      - name: gender
+        tests:
+          - accepted_values:
+              values: ["Male", "Female"]
+      - name: is_duplicate_email
+        description: 1 when the email is shared by more than one customer (potential duplicate record).
+
+  - name: stg_product_enrollments
+    description: Cleansed product enrollments; `limit` renamed to credit_limit.
+    columns:
+      - name: product_id
+        tests: [unique, not_null]
+      - name: product_type
+        tests:
+          - accepted_values:
+              values: ["Savings", "Credit Card"]
+      - name: credit_limit
+        description: Credit limit; 0 for savings products.
+
+  - name: stg_crm_interactions
+    description: Cleansed CRM interactions.
+    columns:
+      - name: interaction_id
+        tests: [unique, not_null]
+      - name: interaction_type
+        tests:
+          - accepted_values:
+              values: ["Call", "Chat", "Email"]
+
+  - name: stg_transactions
+    description: Cleansed transactions with derived inflow/outflow direction.
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: transaction_direction
+        tests:
+          - accepted_values:
+              values: ["inflow", "outflow"]
