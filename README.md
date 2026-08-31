@@ -4,6 +4,25 @@ A unified view of customer behaviour across savings and credit card products.
 Built on SQL Server with dbt, using a simple layered approach:
 raw -> staging -> intermediate -> gold.
 
+## Why a local SQL Server instead of Databricks
+
+The original plan was to build this on Databricks. Two constraints got in
+the way:
+
+- **No full Databricks account** - only the free trial/Community tier was
+  available, which does not allow the workspace features the pipeline needs
+  (Workflows jobs, SQL warehouses, scheduling).
+- **Free-tier limits were reached** - the trial's compute and storage quotas
+  were exhausted while loading the ~1.37M source rows, making repeated
+  end-to-end builds and test runs impossible.
+
+Rather than let platform limits block the deliverable, the pipeline was built
+on a local SQL Server instance with dbt - which demonstrates the same layered
+design, testing discipline and BI-ready output with zero cost and fully
+repeatable runs. The design is portable by intent: the same logic is provided
+as a pure Databricks SQL pipeline in [new_databricks](new_databricks), so it
+can be lifted onto Databricks unchanged once a proper workspace is available.
+
 ## Documentation
 
 - [docs/data_model.md](docs/data_model.md) - model design, layers, lineage diagram

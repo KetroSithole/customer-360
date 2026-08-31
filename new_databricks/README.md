@@ -6,10 +6,17 @@ Same layered design, same business logic, same tests — targeting the
 Databricks **upload UI** into `gotyme.default`, and everything downstream
 runs on a SQL warehouse.
 
+> **Note:** the primary implementation runs on a local SQL Server with dbt
+> because a full Databricks account was not available and the free-tier
+> compute/storage limits were reached during loading. This folder exists so
+> the exact same pipeline can be run on Databricks once a proper workspace
+> is available — see the main [README](../README.md) for the full rationale.
+
 ## Layout
 
 | Script | What it does |
 |---|---|
+| `sql/run_all.sql` | **everything in one script** — staging + intermediate + gold + quality checks; paste into the SQL editor and run |
 | `sql/01_staging.sql` | staging views in `gotyme.staging`: email/mobile cleanup, `is_duplicate_email`, `limit` → `credit_limit`, `transaction_direction` |
 | `sql/02_intermediate.sql` | per-customer aggregation views in `gotyme.intermediate`, plus the `as_of_date` anchor |
 | `sql/03_customer_360.sql` | gold Delta table `gotyme.marts.customer_360` (one row per customer), then `OPTIMIZE ... ZORDER BY (customer_id)` |
