@@ -11,18 +11,23 @@ Usage:
     python load_to_sqlserver.py
 
 Requirements:
-    pandas, pyodbc, and the "ODBC Driver 17 for SQL Server" driver.
-    Connects with Windows authentication (Trusted_Connection).
+    pip install -r requirements.txt (pandas, pyodbc, python-dotenv).
+    Connection settings come from the .env file in the repo root
+    (see .env.example). Connects with Windows authentication.
 """
 
+import os
 from pathlib import Path
 
 import pandas as pd
 import pyodbc
+from dotenv import load_dotenv
 
-SERVER = r"GHOST\MSSQLSERVER02"
-DATABASE = "CaseStudyDB"
-DRIVER = "ODBC Driver 17 for SQL Server"
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+SERVER = os.getenv("MSSQL_SERVER", r"GHOST\MSSQLSERVER02")
+DATABASE = os.getenv("MSSQL_DATABASE", "CaseStudyDB")
+DRIVER = os.getenv("MSSQL_DRIVER", "ODBC Driver 17 for SQL Server")
 CSV_SEPARATOR = "|"
 BATCH_SIZE = 50_000
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "raw"

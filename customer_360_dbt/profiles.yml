@@ -1,12 +1,14 @@
+# Connection settings are read from environment variables (see .env.example
+# in the repo root). Defaults match the original local setup.
 customer_360:
   target: dev
   outputs:
     dev:
       type: sqlserver
-      driver: "ODBC Driver 17 for SQL Server"
-      server: GHOST\MSSQLSERVER02
-      database: CaseStudyDB
-      schema: analytics
+      driver: "{{ env_var('MSSQL_DRIVER', 'ODBC Driver 17 for SQL Server') }}"
+      server: "{{ env_var('MSSQL_SERVER', 'GHOST\\MSSQLSERVER02') }}"
+      database: "{{ env_var('MSSQL_DATABASE', 'CaseStudyDB') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'analytics') }}"
       windows_login: true
       encrypt: false
       trust_cert: true

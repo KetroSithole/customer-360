@@ -1,6 +1,9 @@
 # data files stay local
 data/
 
+# local environment config
+.env
+
 # python
 .venv/
 __pycache__/

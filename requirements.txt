@@ -1,0 +1,6 @@
+# Python dependencies for scripts/ and the dbt project
+pandas>=2.0
+pyodbc>=5.0
+python-dotenv>=1.0
+dbt-core>=1.7,<1.9
+dbt-sqlserver>=1.7,<1.9

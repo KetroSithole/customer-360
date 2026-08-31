@@ -1,8 +1,17 @@
+import os
+from pathlib import Path
+
 import pyodbc
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+SERVER = os.getenv("MSSQL_SERVER", r"GHOST\MSSQLSERVER02")
+DATABASE = os.getenv("MSSQL_DATABASE", "CaseStudyDB")
+DRIVER = os.getenv("MSSQL_DRIVER", "ODBC Driver 17 for SQL Server")
 
 cn = pyodbc.connect(
-    r"DRIVER={ODBC Driver 17 for SQL Server};SERVER=GHOST\MSSQLSERVER02;"
-    r"DATABASE=CaseStudyDB;Trusted_Connection=yes;"
+    f"DRIVER={{{DRIVER}}};SERVER={SERVER};DATABASE={DATABASE};Trusted_Connection=yes;"
 )
 cur = cn.cursor()
 

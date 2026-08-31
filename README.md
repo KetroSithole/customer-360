@@ -26,22 +26,74 @@ Case_study_data/
         data_model.md         model design and lineage
         business_logic.md     metric definitions and why they exist
         data_quality.md       issues found and test coverage
+    .env.example              template for local connection settings
+    requirements.txt          Python dependencies
     README.md
+```
+
+## Prerequisites
+
+- Python 3.10+
+- SQL Server instance you can log into with Windows authentication
+- "ODBC Driver 17 for SQL Server" (or newer - set `MSSQL_DRIVER` accordingly)
+
+## Setup
+
+```bash
+# 1. Create and activate a virtual environment
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS / Linux
+
+# 2. Install dependencies (pandas, pyodbc, python-dotenv, dbt-sqlserver)
+pip install -r requirements.txt
+
+# 3. Create your local environment file and edit it for your machine
+copy .env.example .env        # Windows
+# cp .env.example .env        # macOS / Linux
+```
+
+`.env` holds all connection settings and is git-ignored:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `MSSQL_SERVER` | SQL Server instance | `GHOST\MSSQLSERVER02` |
+| `MSSQL_DATABASE` | Target database | `CaseStudyDB` |
+| `MSSQL_DRIVER` | ODBC driver name | `ODBC Driver 17 for SQL Server` |
+| `DBT_SCHEMA` | Base schema for dbt models | `analytics` |
+
+The Python scripts load `.env` automatically. dbt reads the same variables
+from the shell environment, so either rely on the defaults in
+[customer_360_dbt/profiles.yml](customer_360_dbt/profiles.yml) or export them
+before running dbt:
+
+```powershell
+# PowerShell: load .env into the current session
+Get-Content .env | Where-Object { $_ -match '^\s*[^#].*=' } | ForEach-Object {
+  $name, $value = $_ -split '=', 2; [Environment]::SetEnvironmentVariable($name.Trim(), $value.Trim())
+}
 ```
 
 ## How to run
 
 ```bash
-# 1. Load the raw CSVs into SQL Server (safe to re-run)
+# 1. Load the raw CSVs into SQL Server (idempotent - safe to re-run)
 python scripts/load_to_sqlserver.py
 
 # 2. Build all models and run all tests
 cd customer_360_dbt
 dbt build --profiles-dir .
+
+# Optional: run only the models, or only the tests
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+
+# Optional: one-off data quality profiling of the raw tables
+python ../scripts/profile_dq.py
 ```
 
-Environment: server `GHOST\MSSQLSERVER02`, database `CaseStudyDB`,
-Windows authentication, ODBC Driver 17.
+When the build finishes, the gold table is at
+`CaseStudyDB.marts.customer_360`.
 
 ## Deliverables
 
