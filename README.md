@@ -116,6 +116,83 @@ python ../scripts/profile_dq.py
 When the build finishes, the gold table is at
 `CaseStudyDB.marts.customer_360`.
 
+## Pipeline DAG
+
+The model dependency graph dbt builds and runs (every arrow is a
+`source()`/`ref()`, so run order is enforced automatically):
+
+```mermaid
+flowchart LR
+    subgraph raw [dbo - raw tables]
+        A[customer_raw]
+        B[product_enrollments]
+        C[crm_interactions]
+        D[transaction_history]
+    end
+
+    subgraph staging [staging - views]
+        SA[stg_customers]
+        SB[stg_product_enrollments]
+        SC[stg_crm_interactions]
+        SD[stg_transactions]
+    end
+
+    subgraph intermediate [intermediate - views]
+        R[int_reference_date]
+        IP[int_customer_products]
+        IT[int_customer_transactions]
+        II[int_customer_interactions]
+    end
+
+    subgraph marts [marts - gold]
+        G[[customer_360]]
+    end
+
+    A --> SA
+    B --> SB
+    C --> SC
+    D --> SD
+
+    SD --> R
+    SC --> R
+    SB --> IP
+    SD --> IT
+    SC --> II
+    R --> IT
+    R --> II
+
+    SA --> G
+    IP --> G
+    IT --> G
+    II --> G
+    R --> G
+```
+
+## What a run does and produces
+
+```mermaid
+flowchart TD
+    S1["1 - python scripts/load_to_sqlserver.py"] --> O1["dbo: 4 raw tables loaded<br/>~1.37M rows (skips tables that already have data)"]
+    O1 --> S2["2 - dbt build"]
+
+    S2 --> P1["staging: 4 views created<br/>emails/mobiles cleaned, flags derived"]
+    P1 --> P2["intermediate: 4 views created<br/>as_of_date anchor + per-customer aggregations"]
+    P2 --> P3["marts: customer_360 table built<br/>100,000 rows x ~45 columns, indexed"]
+    P3 --> P4["62 tests executed<br/>unique / not_null / relationships /<br/>accepted_values + 6 singular tests"]
+
+    P4 --> R1{"result"}
+    R1 -->|"61 pass, 1 warn, 0 errors"| OK["build succeeds<br/>warn = 3 duplicate emails, flagged on purpose"]
+    R1 -->|any error| KO["build fails - broken model or<br/>data quality violation surfaced"]
+
+    OK --> OUT[("CaseStudyDB.marts.customer_360<br/>BI-ready: one row per customer with<br/>segments, flags and metrics precomputed")]
+    OUT --> BI["Power BI / Tableau<br/>filter on plain columns, no logic re-derived"]
+```
+
+In short: step 1 lands the raw CSVs, step 2 walks the DAG above in
+dependency order (staging → intermediate → gold), runs all 62 tests as it
+goes, and the finished product is one tested table —
+`CaseStudyDB.marts.customer_360` — ready to plug into a BI tool.
+
 ## Run it on Databricks instead
 
 The same pipeline exists as pure Databricks SQL in
