@@ -10,6 +10,7 @@ raw -> staging -> intermediate -> gold.
 - [docs/business_logic.md](docs/business_logic.md) - metric definitions and the reasoning behind them
 - [docs/data_quality.md](docs/data_quality.md) - issues found, test coverage, recommendations
 - [customer_360_dbt/README.md](customer_360_dbt/README.md) - dbt project notes
+- [new_databricks/README.md](new_databricks/README.md) - Databricks SQL version of the pipeline
 
 ## Folder structure
 
@@ -22,6 +23,7 @@ Case_study_data/
         load_to_sqlserver.py  loads the CSVs into CaseStudyDB
         profile_dq.py         one-off data quality profiling
     customer_360_dbt/         dbt project (models, tests)
+    new_databricks/           Databricks SQL version (staging, gold, checks)
     docs/
         data_model.md         model design and lineage
         business_logic.md     metric definitions and why they exist
@@ -94,6 +96,15 @@ python ../scripts/profile_dq.py
 
 When the build finishes, the gold table is at
 `CaseStudyDB.marts.customer_360`.
+
+## Run it on Databricks instead
+
+The same pipeline exists as pure Databricks SQL in
+[new_databricks](new_databricks). Upload the four CSVs with the Catalog
+upload UI into `gotyme.default`, run the four scripts in
+[new_databricks/sql](new_databricks/sql) in order on a SQL warehouse, and
+query `gotyme.marts.customer_360`. Automation via a scheduled Workflows job
+is described in [new_databricks/README.md](new_databricks/README.md).
 
 ## Deliverables
 
